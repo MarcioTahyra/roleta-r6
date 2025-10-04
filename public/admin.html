@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Painel do Admin</title>
+  <style>
+    body { font-family: sans-serif; background: #222; color: #fff; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+    .container { max-width: 700px; width: 100%; }
+    .hidden { display: none !important; }
+    h1 { text-align: center; }
+    #login-container { background: #333; padding: 30px; border-radius: 8px; }
+    #login-container input { width: calc(100% - 24px); padding: 12px; margin-bottom: 15px; border-radius: 5px; border: none; background-color: #444; color: #fff; }
+    .btn { background: #337ab7; color: white; width: 100%; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-size: 1rem; }
+    .error { color: #d9534f; text-align: center; height: 20px; }
+    #user-list { list-style: none; padding: 0; }
+    .user-item { background: #333; padding: 15px; margin-bottom: 10px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
+    .user-info { flex-grow: 1; }
+    .user-actions button { margin-left: 10px; padding: 8px 12px; border-radius: 5px; border: none; cursor: pointer; color: white; }
+    .reset-btn { background: #5bc0de; }
+    .kick-btn { background: #d9534f; }
+    .setting-toggle { background: #333; padding: 15px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+    .setting-toggle label { font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="login-container">
+      <h1>Acesso Restrito</h1>
+      <input type="password" id="admin-password" placeholder="Senha do Admin">
+      <button id="admin-login-btn" class="btn">Entrar</button>
+      <p id="admin-error-message" class="error"></p>
+    </div>
+    <div id="panel-container" class="hidden">
+      <h1>Painel de Controle</h1>
+      <div class="setting-toggle">
+        <label for="ip-lock-toggle">Bloquear múltiplos usuários por IP:</label>
+        <input type="checkbox" id="ip-lock-toggle">
+      </div>
+      <div class="setting-toggle">
+        <label for="cooldown-toggle">Ativar sistema de cooldown (30s):</label>
+        <input type="checkbox" id="cooldown-toggle">
+      </div>
+      <button id="reset-all-btn" class="btn" style="background-color: #f0ad4e; margin-bottom: 20px;">Resetar Cooldown de TODOS</button>
+      
+      <h2>Usuários Conectados</h2>
+      <ul id="user-list"></ul>
+    </div>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const loginContainer = document.getElementById('login-container');
+    const panelContainer = document.getElementById('panel-container');
+    const passwordInput = document.getElementById('admin-password');
+    const loginBtn = document.getElementById('admin-login-btn');
+    const errorMessage = document.getElementById('admin-error-message');
+    const userList = document.getElementById('user-list');
+    const ipLockToggle = document.getElementById('ip-lock-toggle');
+    const cooldownToggle = document.getElementById('cooldown-toggle');
+    const resetAllBtn = document.getElementById('reset-all-btn'); // NOVO
+
+    loginBtn.addEventListener('click', () => socket.emit('adminLogin', passwordInput.value));
+    socket.on('adminLoginSuccess', (data) => {
+      loginContainer.classList.add('hidden');
+      panelContainer.classList.remove('hidden');
+      ipLockToggle.checked = data.isIpLockEnabled;
+      cooldownToggle.checked = data.isCooldownEnabled;
+    });
+    socket.on('adminLoginFail', (message) => { errorMessage.textContent = message; });
+    
+    // Listeners dos Toggles e Botões
+    ipLockToggle.addEventListener('change', () => socket.emit('adminToggleIpLock', ipLockToggle.checked));
+    cooldownToggle.addEventListener('change', () => socket.emit('adminToggleCooldown', cooldownToggle.checked));
+    // NOVO
+    resetAllBtn.addEventListener('click', () => {
+        if (confirm('Tem certeza que quer resetar o cooldown de TODOS os jogadores?')) {
+            socket.emit('adminResetAllCooldowns');
+        }
+    });
+
+    socket.on('ipLockStateChanged', (newState) => { ipLockToggle.checked = newState; });
+    socket.on('cooldownStateChanged', (newState) => { cooldownToggle.checked = newState; });
+    socket.on('updateUserList', (users) => {
+      userList.innerHTML = '';
+      users.forEach(user => {
+        const li = document.createElement('li');
+        li.classList.add('user-item');
+        li.innerHTML = `<div class="user-info"><strong>${user.nickname}</strong><br><small>ID: ${user.id}</small><br><small>IP: ${user.ip}</small></div><div class="user-actions"><button class="reset-btn" data-id="${user.id}" title="Resetar Cooldown">Resetar CD</button><button class="kick-btn" data-id="${user.id}" title="Expulsar Usuário">Expulsar</button></div>`;
+        userList.appendChild(li);
+      });
+    });
+    userList.addEventListener('click', (event) => {
+      const target = event.target;
+      const userId = target.dataset.id;
+      if (!userId) return;
+      const userNickname = target.closest('.user-item').querySelector('strong').textContent;
+      if (target.classList.contains('kick-btn')) { if (confirm(`Tem certeza que quer expulsar ${userNickname}?`)) { socket.emit('kickUser', userId); } } 
+      else if (target.classList.contains('reset-btn')) { if (confirm(`Tem certeza que quer resetar o cooldown de ${userNickname}?`)) { socket.emit('adminResetUserCooldown', userId); } }
+    });
+  </script>
+</body>
+</html>

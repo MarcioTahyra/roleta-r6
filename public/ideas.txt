@@ -1,0 +1,7 @@
+  -garantir role
+  -troca amigo
+  -toggle shield
+  -ban (limite?)
+  -sem repetir
+  -dentro/fora bomb
+  -consumiveis (skip/like/dislike)

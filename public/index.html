@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sorteador de Operador R6</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="login-screen">
+    <h1>Entrar no Sorteador</h1>
+    <input type="text" id="nickname-input" placeholder="Seu Apelido" required>
+    <input type="password" id="password-input" placeholder="Senha da Sala" required>
+    <button id="login-btn" class="btn">Entrar</button>
+    <p id="error-message" class="error"></p>
+  </div>
+
+  <main id="app" class="hidden">
+    <h1>Sorteador de Operadores - Rainbow Six Siege</h1>
+    <div class="actions">
+      <button id="get-attacker-btn" class="btn attacker-btn">Sortear Atacante</button>
+      <button id="get-defender-btn" class="btn defender-btn">Sortear Defensor</button>
+    </div>
+    <p>Clique em outro jogador para propor uma troca.</p>
+    <div id="results-container" class="results-container"></div>
+    <div class="settings-panel">
+        <h2>Habilidades & Configurações</h2>
+        
+        <div class="setting-item">
+            <label for="shield-toggle">Permitir operadores com escudo:</label>
+            <label class="switch">
+              <input type="checkbox" id="shield-toggle" checked>
+              <span class="slider round"></span>
+            </label>
+        </div>
+
+        <div class="setting-item">
+            <label>Banir Atacante:</label>
+            <button id="open-ban-atk-modal" class="btn ban-btn">Escolher</button>
+        </div>
+        <div class="setting-item">
+            <label>Banir Defensor:</label>
+            <button id="open-ban-def-modal" class="btn ban-btn">Escolher</button>
+        </div>
+    </div>
+  </main>
+
+  <div id="swap-notification" class="hidden">
+      <div class="notification-box">
+          <p id="swap-message">Proposta de Troca</p>
+          <div id="swap-details"></div>
+          <div class="notification-actions">
+              <button id="accept-swap-btn" class="btn attacker-btn">Aceitar</button>
+              <button id="decline-swap-btn" class="btn defender-btn">Recusar</button>
+          </div>
+      </div>
+  </div>
+
+  <div id="ban-modal" class="hidden">
+      <div class="modal-content">
+          <h2 id="ban-modal-title"></h2>
+          <div id="ban-icon-grid"></div>
+          <div class="modal-actions">
+              <button id="confirm-ban-btn" class="btn attacker-btn">Confirmar</button>
+              <button id="cancel-ban-btn" class="btn defender-btn">Cancelar</button>
+          </div>
+      </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="client.js"></script>
+</body>
+</html>

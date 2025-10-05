@@ -1,5 +1,3 @@
-// client.js - VERSÃO COM LÓGICA VISUAL DE BAN
-
 const socket = io();
 
 // --- Captura de Elementos ---
@@ -32,7 +30,6 @@ let allAttackers = [];
 let allDefenders = [];
 let myBans = { atk: null, def: null };
 let banModalState = { type: null, selectedOperator: null };
-// NOVO: Lista de operadores de escudo para a lógica visual
 const shieldOperators = new Set(['blitz', 'montagne', 'osa', 'blackbeard', 'clash']);
 
 // --- Funções ---
@@ -59,7 +56,6 @@ function updateSelectionsDisplay(selections) {
   }
 }
 
-// MODIFICADO: Função que abre o modal de ban agora tem a lógica visual
 function openBanModal(type) {
     const isAttack = type === 'atk';
     banModalState.type = type;
@@ -77,7 +73,6 @@ function openBanModal(type) {
         icon.classList.add('ban-icon');
         icon.dataset.operatorName = op;
 
-        // Lógica para desabilitar visualmente operadores de escudo
         if (shieldsAreDisabled && shieldOperators.has(op.toLowerCase())) {
             icon.classList.add('icon-disabled');
         }

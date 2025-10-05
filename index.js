@@ -153,6 +153,6 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`Servidor rodando! Painel do admin em /admin`);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`Servidor rodando na porta ${PORT}! Painel do admin em /admin`);
 });

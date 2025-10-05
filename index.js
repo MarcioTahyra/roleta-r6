@@ -1,5 +1,3 @@
-// index.js (ou server.js) - VERSÃO FINAL E ESTRUTURALMENTE CORRETA
-
 const express = require('express');
 const http = require('http');
 const { Server } = require("socket.io");
@@ -67,7 +65,7 @@ const resetAllUserCooldowns = () => {
     }
 };
 
-// --- Lógica Principal da Conexão ---
+// --- Conexão ---
 io.on('connection', (socket) => {
 
   socket.on('loginAttempt', (data) => {

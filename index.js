@@ -69,7 +69,14 @@ const resetAllUserCooldowns = () => {
 io.on('connection', (socket) => {
 
   socket.on('loginAttempt', (data) => {
-    const userIp = socket.handshake.address;
+    const forwardedFor = socket.handshake.headers['x-forwarded-for'];
+    let userIp;
+    
+    if (forwardedFor) {
+      userIp = forwardedFor.split(',')[0].trim();
+    } else {
+      userIp = socket.handshake.address;
+    }
     if (isIpLockEnabled && Object.values(connectedUsers).some(user => user.ip === userIp)) return socket.emit('loginFail', 'Este endereço de IP já está conectado!');
     if (data.password !== APP_PASSWORD) return socket.emit('loginFail', 'Senha incorreta!');
     if (Object.values(connectedUsers).some(user => user.nickname === data.nickname)) return socket.emit('loginFail', 'Este apelido já está em uso!');
